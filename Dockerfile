@@ -41,13 +41,14 @@ ADD sge_auto_install.conf /root/sge_auto_install.conf
 ADD docker_sge_init.sh /etc/my_init.d/01_docker_sge_init.sh
 ADD sge_exec_host.conf /root/sge_exec_host.conf
 ADD sge_queue.conf /root/sge_queue.conf
+ADD sge_hostgrp.conf /root/sge_hostgrp.conf
 RUN chmod ug+x /etc/my_init.d/01_docker_sge_init.sh
 
 # change to home directory
 WORKDIR $HOME
 
 # retrieve required files
-RUN wget -c http://dist.codehaus.org/izpack/releases/4.3.5/IzPack-install-4.3.5.jar
+RUN wget -c http://download.jboss.org/jbosstools/updates/requirements/izpack/4.3.5/IzPack-install-4.3.5.jar
 RUN wget -c http://www.mirrorservice.org/sites/archive.ubuntu.com/ubuntu/pool/main/libz/libzip/libzip1_0.9-3_amd64.deb
 RUN wget -c http://www.mirrorservice.org/sites/archive.ubuntu.com/ubuntu/pool/main/libz/libzip/libzip-dev_0.9-3_amd64.deb
 RUN wget -c http://archive.cloudera.com/one-click-install/lucid/cdh3-repository_1.0_all.deb
@@ -93,6 +94,7 @@ RUN echo Y | ./scripts/distinst -local -allall -libs -noexit
 WORKDIR $SGE_ROOT
 RUN ./inst_sge -m -x -s -auto ~/sge_auto_install.conf \
 && /etc/my_init.d/01_docker_sge_init.sh && sed -i "s/HOSTNAME/`hostname`/" $HOME/sge_exec_host.conf \
+&& sed -i "s/HOSTNAME/`hostname`/" $HOME/sge_hostgrp.conf \
 && /opt/sge/bin/lx-amd64/qconf -au sgeadmin arusers \
 && /opt/sge/bin/lx-amd64/qconf -Me $HOME/sge_exec_host.conf \
 && /opt/sge/bin/lx-amd64/qconf -Aq $HOME/sge_queue.conf
